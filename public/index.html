@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Caixa - Minha Loja</title>
+</head>
+<body>
+  <h1>🧾 CAIXA - MINHA LOJA</h1>
+
+  <input id="codigo" placeholder="Código de barras" autofocus>
+  <button onclick="buscar()">Adicionar</button>
+
+  <ul id="lista"></ul>
+
+  <h2>Total: R$ <span id="total">0.00</span></h2>
+  <button onclick="finalizar()">Finalizar venda</button>
+
+  <script>
+    let total = 0;
+
+    function buscar() {
+      const codigo = document.getElementById("codigo").value;
+      fetch("/produto/" + codigo)
+        .then(r => r.json())
+        .then(p => {
+          if (!p) return alert("Produto não encontrado");
+          total += p.preco;
+          document.getElementById("total").innerText = total.toFixed(2);
+          const li = document.createElement("li");
+          li.innerText = `${p.nome} - R$ ${p.preco}`;
+          document.getElementById("lista").appendChild(li);
+          document.getElementById("codigo").value = "";
+        });
+    }
+
+    function finalizar() {
+      fetch("/venda", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ total })
+      }).then(() => {
+        alert("Venda finalizada");
+        location.reload();
+      });
+    }
+  </script>
+</body>
+</html>
